@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tchin - Jeu Festif</title>
+    <meta name="description" content="Le jeu festif à boire entre amis">
+    <meta name="theme-color" content="#8B4513">
+
+    <!-- Polices -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Bubblegum+Sans&display=swap" rel="stylesheet">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- iOS Safari -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Tchin">
+</head>
+<body>
+<!-- Animation des bulles -->
+<div class="bubbles-container" id="bubbles-container"></div>
+
+<div class="app-container">
+    <!-- Indicateur de connexion -->
+    <div id="connection-status" class="connection-status offline">
+        <span>🔴 Hors ligne</span>
+    </div>
+
+    <!-- Cadre principal unique -->
+    <div class="main-frame">
+        <div class="frame-content">
+            <!-- Écran d'ajout des joueurs -->
+            <div id="players-screen" class="screen active">
+                <div class="header">
+                    <div class="logo">🍻 Tchin</div>
+                    <p class="subtitle">Jeu festif entre amis</p>
+                </div>
+
+                <div class="player-form">
+                    <input type="text" id="player-name" class="form-input" placeholder="Prénom ou pseudo" maxlength="12">
+                    <button id="add-player-btn" class="btn btn-primary">
+                        <span class="btn-icon">➕</span>
+                        Ajouter
+                    </button>
+                </div>
+
+                <div class="player-list">
+                    <div class="section-header">
+                        <h3>Joueurs</h3>
+                        <span class="player-count-badge" id="player-count">0</span>
+                    </div>
+                    <div id="players-list" class="players-grid"></div>
+                </div>
+
+                <div class="action-section">
+                    <button id="start-game-btn" class="btn btn-primary btn-large" disabled>
+                        <span class="btn-icon">🎮</span>
+                        Commencer la partie
+                    </button>
+
+                    <!-- Bouton d'installation PWA -->
+                    <button id="install-btn" class="btn btn-secondary" style="display: none;">
+                        <span class="btn-icon">📱</span>
+                        Installer l'app
+                    </button>
+                </div>
+            </div>
+
+            <!-- Écran de sélection du mode -->
+            <div id="mode-screen" class="screen">
+                <div class="header">
+                    <div class="logo">🎯 Mode de jeu</div>
+                    <p class="subtitle">Choisissez le style de partie</p>
+                </div>
+
+                <div class="mode-selection">
+                    <div class="mode-card" data-mode="classic">
+                        <div class="mode-icon">🍺</div>
+                        <h3 class="mode-title">Classique</h3>
+                        <p class="mode-description">Défis équilibrés et conviviaux</p>
+                        <div class="mode-badge">Recommandé</div>
+                    </div>
+
+                    <div class="mode-card" data-mode="hard">
+                        <div class="mode-icon">🔥</div>
+                        <h3 class="mode-title">Intense</h3>
+                        <p class="mode-description">Pour les joueurs expérimentés</p>
+                        <div class="mode-badge">Challenge</div>
+                    </div>
+
+                    <div class="mode-card" data-mode="duo">
+                        <div class="mode-icon">👯</div>
+                        <h3 class="mode-title">Duo</h3>
+                        <p class="mode-description">Défis en équipe de deux</p>
+                        <div class="mode-badge">Equipe</div>
+                    </div>
+
+                    <div class="mode-card" data-mode="bar">
+                        <div class="mode-icon">🍹</div>
+                        <h3 class="mode-title">Bar</h3>
+                        <p class="mode-description">Trop bien quand tu es au bar</p>
+                        <div class="mode-badge">Débile</div>
+                    </div>
+                </div>
+
+                <div class="action-section">
+                    <button id="confirm-mode-btn" class="btn btn-primary btn-large" disabled>
+                        <span class="btn-icon">✅</span>
+                        Confirmer le mode
+                    </button>
+                    <button id="back-to-players-btn" class="btn btn-text">
+                        ← Retour
+                    </button>
+                </div>
+            </div>
+
+            <!-- Écran de jeu -->
+            <div id="game-screen" class="screen">
+                <div class="game-header">
+                    <div class="game-info">
+                        <span id="current-player-count" class="player-count">0 joueurs</span>
+                        <span class="mode-badge-small" id="current-mode">Classique</span>
+                    </div>
+                    <button id="menu-btn" class="btn btn-text">
+                        <span class="btn-icon">⚙️</span>
+                        Menu
+                    </button>
+                </div>
+
+                <div class="question-card">
+                    <div class="question-icon">🎲</div>
+                    <div id="question-text" class="question-text">
+                        Prêt à jouer ? Appuyez sur "Défi suivant" pour commencer !
+                    </div>
+                    <div class="question-counter">
+                        Défi <span id="question-number">1</span>
+                    </div>
+                </div>
+
+                <div class="game-controls">
+                    <button id="prev-question-btn" class="btn btn-secondary">
+                        <span class="btn-icon">◀</span>
+                        Précédent
+                    </button>
+                    <button id="next-question-btn" class="btn btn-primary">
+                        <span class="btn-icon">▶</span>
+                        Défi suivant
+                    </button>
+                </div>
+
+                <div class="footer">
+                    <p>Profitez de votre soirée 🎉</p>
+                    <p class="app-version">Tchin v1.0 · Fonctionne hors ligne</p>
+                </div>
+
+                <!-- Bouton flottant pour ajouter des joueurs -->
+                <button id="add-player-menu-btn" class="floating-add-btn">
+                    <span class="floating-add-icon">+</span>
+                </button>
+            </div>
+
+            <!-- Nouvel écran pour ajouter des joueurs pendant la partie -->
+            <div id="add-player-screen" class="screen">
+                <div class="header">
+                    <div class="logo">👥 Ajouter un joueur</div>
+                    <p class="subtitle">Ajoutez des joueurs pendant la partie</p>
+                </div>
+
+                <div class="player-form">
+                    <input type="text" id="player-name-during-game" class="form-input" placeholder="Prénom ou pseudo" maxlength="12">
+                    <button id="add-player-during-game-btn" class="btn btn-primary">
+                        <span class="btn-icon">➕</span>
+                        Ajouter le joueur
+                    </button>
+                </div>
+
+                <div class="player-list">
+                    <div class="section-header">
+                        <h3>Joueurs actuels</h3>
+                        <span class="player-count-badge" id="current-player-count-during">0</span>
+                    </div>
+                    <div id="players-list-during" class="players-grid"></div>
+                </div>
+
+                <div class="action-section">
+                    <button id="back-to-game-btn" class="btn btn-primary btn-large">
+                        <span class="btn-icon">🎮</span>
+                        Retour au jeu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="script.js"></script>
+
+<!-- Styles supplémentaires pour l'animation des bulles et messages -->
+<style>
+    /* MODIFICATIONS POUR PLUS DE TRANSPARENCE ET CADRE AGRANDI */
+
+    /* Background gradient avec plus de transparence */
+    body {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: linear-gradient(to bottom, #FFD700, #FFA500, #8B4513);
+        position: relative;
+        overflow-x: hidden;
+        font-weight: 400;
+    }
+
+    .app-container {
+        min-height: 100vh;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 20px;
+        padding-top: 40px;
+    }
+
+    /* Cadre principal avec plus de transparence */
+    .main-frame {
+        background: rgba(30, 30, 30, 0.75);
+        border-radius: 20px;
+        padding: 0;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+        margin-top: 0;
+    }
+
+    .frame-content {
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        min-height: 650px;
+    }
+
+    /* Animation des bulles */
+    .bubbles-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .bubble {
+        position: absolute;
+        bottom: -100px;
+        background: rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        animation: rise linear infinite;
+        opacity: 0.7;
+    }
+
+    @keyframes rise {
+        0% {
+            transform: translateY(0) scale(1);
+            opacity: 0.7;
+        }
+        100% {
+            transform: translateY(-120vh) scale(1.3);
+            opacity: 0;
+        }
+    }
+
+    /* Messages d'erreur et de blocage */
+    .error-message, .blocked-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        z-index: 10000;
+        font-weight: bold;
+        border: 2px solid #FFD700;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: fadeInOut 3s ease-in-out;
+    }
+
+    .blocked-message {
+        background: rgba(244, 67, 54, 0.9);
+        border-color: #F44336;
+    }
+
+    .success-message {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(76, 175, 80, 0.9);
+        color: white;
+        padding: 20px;
+        border-radius: 15px;
+        text-align: center;
+        z-index: 10000;
+        font-weight: bold;
+        border: 2px solid #4CAF50;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        animation: fadeInOut 2s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0; }
+        10%, 90% { opacity: 1; }
+    }
+
+    /* Animation pour les questions */
+    .bounce {
+        animation: bounce 0.6s ease;
+    }
+
+    @keyframes bounce {
+        0%, 20%, 60%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        80% { transform: translateY(-5px); }
+    }
+
+    /* Bouton flottant pour ajouter des joueurs */
+    .floating-add-btn {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8B4513, #FF6B35);
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+
+    .floating-add-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .floating-add-btn:active {
+        transform: scale(0.95);
+    }
+
+    .floating-add-icon {
+        line-height: 1;
+    }
+
+    /* Ajustement pour l'écran de jeu */
+    #game-screen {
+        position: relative;
+    }
+</style>
+
+<script>
+    // Animation des bulles
+    function createBubbles() {
+        const container = document.getElementById('bubbles-container');
+        const bubbleCount = 20;
+
+        for (let i = 0; i < bubbleCount; i++) {
+            const bubble = document.createElement('div');
+            bubble.classList.add('bubble');
+
+            const size = Math.random() * 30 + 10;
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}%`;
+
+            const duration = Math.random() * 15 + 10;
+            const delay = Math.random() * 8;
+            bubble.style.animationDuration = `${duration}s`;
+            bubble.style.animationDelay = `${delay}s`;
+
+            container.appendChild(bubble);
+        }
+    }
+
+    // Initialiser l'application
+    document.addEventListener('DOMContentLoaded', function() {
+        createBubbles();
+
+        // Vérifier que tous les éléments nécessaires sont chargés
+        if (typeof initApp === 'function') {
+            initApp();
+        } else {
+            console.error('Le fichier script.js n\'est pas chargé correctement');
+        }
+    });
+
+    // Fallback si le service worker échoue
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js')
+                .then(function(registration) {
+                    console.log('ServiceWorker enregistré avec succès: ', registration.scope);
+                })
+                .catch(function(error) {
+                    console.log("Échec de l'enregistrement du ServiceWorker: ", error);
+                });
+        });
+    }
+</script>
+</body>
+</html>
