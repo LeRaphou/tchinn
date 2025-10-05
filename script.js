@@ -165,6 +165,10 @@ const gameData = {
             {text: "🚀 {player1}, invente une règle qui s'applique à tout le monde jusqu'à ton prochain tour.", players: 1},
             {text: "🤔 {player1}, réponds à une question personnelle ou bois 2 gorgées.", players: 1},
             {text: "🎯 {player1}, fais un compliment à la personne à ta gauche.", players: 1},
+            {text: "🍑 {player1}, avec qui tu pourrais avoir un rapport Anal dans la soirée, sinon bois 5 gorgées.", players: 1},
+            {text: "🍷 Tous le monde boit.", players: 1},
+            {text: "👨‍🦰 Tous les roux doivent voir 5 gorgées ", players: 1},
+            {text: "👩🏿 Toute les femmes de soirée doivent cul sec leur verre", players: 1},
 
             // Questions avec 2 joueurs
             {text: "🍻 {player1}, bois 3 gorgées si {player2} t'a déjà battu à un jeu vidéo.", players: 2},
@@ -748,22 +752,18 @@ function getModeDisplayName(mode) {
     return names[mode] || mode;
 }
 
+// ===== SUPPRIMER LA SAUVEGARDE =====
 function saveGameData() {
-    localStorage.setItem('tchin-game-data', JSON.stringify(gameData));
+    // Ne rien sauvegarder - les données ne seront pas conservées
 }
 
 function loadGameData() {
-    const saved = localStorage.getItem('tchin-game-data');
-    if (saved) {
-        try {
-            const data = JSON.parse(saved);
-            Object.assign(gameData, data);
-            updatePlayersList();
-            updateStartButtonState();
-        } catch (e) {
-            console.error('Erreur lors du chargement des données:', e);
-        }
-    }
+    // Ne rien charger - réinitialiser les données à chaque démarrage
+    gameData.players = [];
+    gameData.currentMode = null;
+    gameData.usedQuestions = [];
+    updatePlayersList();
+    updateStartButtonState();
 }
 
 // Initialisation
@@ -773,6 +773,7 @@ function initApp() {
     // Activer le blocage du rafraîchissement
     blockRefreshCompletely();
 
+    // Charger les données (maintenant ça réinitialise tout)
     loadGameData();
 
     // Événements
@@ -818,7 +819,7 @@ function initApp() {
         });
     }
 
-    // BOUTON "DÉFI SUIVANT" - CORRIGÉ
+    // BOUTON "DÉFI SUIVANT"
     if (buttons.nextQuestion) {
         buttons.nextQuestion.addEventListener('click', () => {
             console.log("🎲 Bouton 'Défi suivant' cliqué");
@@ -842,7 +843,7 @@ function initApp() {
 
     if (buttons.menu) {
         buttons.menu.addEventListener('click', () => {
-            saveGameData();
+            // Ne pas sauvegarder, juste changer d'écran
             showScreen('players');
         });
     }
@@ -864,7 +865,7 @@ function initApp() {
 
     if (buttons.backToGame) {
         buttons.backToGame.addEventListener('click', () => {
-            saveGameData();
+            // Ne pas sauvegarder, juste changer d'écran
             showScreen('game');
         });
     }
